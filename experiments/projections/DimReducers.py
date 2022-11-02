@@ -6,6 +6,8 @@ import numpy as np
 np.seterr(all='raise') #handle nan/inf error (in eigenvec computation)
 
 
+
+
 # PCA Class (referenced– https://medium.com/accel-ai/pca-algorithm-tutorial-in-python-93ff19212026)
 class PCA:
 
@@ -56,9 +58,9 @@ class PCA:
 
 
     # Wrapper to Compute PCA Nicely
-    def compute(self, data_matrix):
+    def compute(self, data_matrix, n_components=2):
         data_matrix = np.array(data_matrix) #convert list of tensors into a numpy ndarray of correct dim: (70k x 784)
-        projected_data_matrix = self.run(data_matrix, 3) #2 for 2d, 3 for 3d (controls dimensions for Principal Components)
+        projected_data_matrix = self.run(data_matrix, n_components) #2 for 2d, 3 for 3d (controls dimensions for Principal Components)
         return projected_data_matrix
 
 
