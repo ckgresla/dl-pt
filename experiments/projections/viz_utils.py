@@ -24,17 +24,18 @@ def get_3d_items(dm, lv, N=None):
 # Given a Model & a Index -- Plot Original Image & Reconstruction
 def plot_img_recon(model, idx):
     x, y = dataset.__getitem__(idx)[0], dataset.__getitem__(idx)[1]
-    fig, ax = plt.subplots(nrows=1, ncols=2,figsize=(5, 5))
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(5, 5))
 
     # Plot Original
     ax[0].imshow(x.squeeze(0))
     ax[0].set_title(f"Original Instance - {y}")
 
-    # Compute Reconstruction and Plot
+    # Compute Reconstruction and Reshape
     x = x.reshape(1, 784)
     x = x.to(device)
     out = model(x)
-
     out = out.reshape(28, 28).to("cpu").detach().numpy() #get output, reshape to img matrix, move to CPU as a Numpy Array
+
+    # Plot Reconstruction
     ax[1].imshow(out)
     ax[1].set_title(f"Reconstruction - {y}")

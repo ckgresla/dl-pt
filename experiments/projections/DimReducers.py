@@ -57,7 +57,7 @@ class PCA:
         return P
 
 
-    # Wrapper to Compute PCA Nicely
+    # Wrapper to Compute PCA Nicely --> returns best `n_components`
     def compute(self, data_matrix, n_components=2):
         data_matrix = np.array(data_matrix) #convert list of tensors into a numpy ndarray of correct dim: (70k x 784)
         projected_data_matrix = self.run(data_matrix, n_components) #2 for 2d, 3 for 3d (controls dimensions for Principal Components)
