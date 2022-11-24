@@ -131,7 +131,7 @@ dmypy.json
 
 # CKG Added 
 data/*
-models/*
+models/
 
 *DS_STORE*
 
