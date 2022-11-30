@@ -32,7 +32,7 @@ def plot_img_recon(model, idx):
 
     # Compute Reconstruction and Reshape
     x = x.reshape(1, 784)
-    x = x.to(device)
+    x = x.to(device) #i.e; device = "cuda" if torch.cuda.is_available() else "cpu"
     out = model(x)
     out = out.reshape(28, 28).to("cpu").detach().numpy() #get output, reshape to img matrix, move to CPU as a Numpy Array
 
