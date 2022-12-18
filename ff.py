@@ -36,31 +36,36 @@ def MNIST_loaders(train_batch_size=50000, test_batch_size=10000):
 # Function to Add the Label information to Images (mentioned in Hinton's paper, see Section 3.3)
 def overlay_y_on_x(x, y):
     """
-    x is a single training instance (MNIST Vec of len 784) and y is the scalar value representing the label 
+    x & y are the entirety of a batch (whole training set)
     """
     x_ = x.clone()
-    x_[:, :10] *= 0.0
+    x_[:, :10] *= 0.0 #first 10 values of a training instance's 784 long vector
     x_[range(x.shape[0]), y] = x.max()
     return x_
 
 
+# Network Class that Instantiates our Custom Layers Class & Implements the Train/Predict Funcs
 class Net(torch.nn.Module):
 
     def __init__(self, dims):
         super().__init__()
         self.layers = []
+        # Append Layers w Correct Dimensions for Weight Matrices -- dims is a list of ints (i.e; list[int])
         for d in range(len(dims) - 1):
             self.layers += [Layer(dims[d], dims[d + 1]).cuda()]
 
     def predict(self, x):
         goodness_per_label = []
         for label in range(10):
-            h = overlay_y_on_x(x, label)
+            h = overlay_y_on_x(x, label) #put current label in iteration on training instance
             goodness = []
             for layer in self.layers:
                 h = layer(h)
-                goodness += [h.pow(2).mean(1)]
+                goodness += [h.pow(2).mean(1)] #sum of squared "goodness" -- take max for pred
+            # Compute Goodness for Current Label in Range Iters
             goodness_per_label += [sum(goodness).unsqueeze(1)]
+
+        # Get Goodness Over all Labels 
         goodness_per_label = torch.cat(goodness_per_label, 1)
         return goodness_per_label.argmax(1)
 
@@ -78,7 +83,8 @@ class Layer(nn.Linear):
         self.relu = torch.nn.ReLU()
         self.opt = Adam(self.parameters(), lr=0.03)
         self.threshold = 2.0
-        self.num_epochs = 1000
+        # self.num_epochs = 1000
+        self.num_epochs = 10000 #10x increase in epochs, what do?
 
     def forward(self, x):
         x_direction = x / (x.norm(2, 1, keepdim=True) + 1e-4)
@@ -105,14 +111,21 @@ class Layer(nn.Linear):
 if __name__ == "__main__":
     # torch.manual_seed(1234)
     torch.manual_seed(42)
-    train_loader, test_loader = MNIST_loaders()
+    train_loader, test_loader = MNIST_loaders() #loaders load in the entirety of the MNIST Set
 
+    # Instantiate Model + Data
     net = Net([784, 500, 500])
     x, y = next(iter(train_loader))
     x, y = x.cuda(), y.cuda()
-    x_pos = overlay_y_on_x(x, y)
+
+    x_pos = overlay_y_on_x(x, y) #add actual labels to training instances
+
+
+    # Create Random Label for x_negative
     rnd = torch.randperm(x.size(0))
     x_neg = overlay_y_on_x(x, y[rnd])
+
+    # Go Forward-forward
     net.train(x_pos, x_neg)
 
     print('train error:', 1.0 - net.predict(x).eq(y).float().mean().item())
